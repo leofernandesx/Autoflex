@@ -48,7 +48,7 @@ function ProductionCalculation() {
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
-          Cálculo de Produção
+          Production Calculation
         </Typography>
         <Button
           variant="contained"
@@ -56,7 +56,7 @@ function ProductionCalculation() {
           onClick={handleCalculate}
           disabled={loading}
         >
-          Recalcular
+          Recalculate
         </Button>
       </Box>
 
@@ -75,13 +75,13 @@ function ProductionCalculation() {
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={1}>
                     <CalculateIcon color="primary" sx={{ mr: 1 }} />
-                    <Typography variant="h6">Total de Produtos</Typography>
+                    <Typography variant="h6">Total Products</Typography>
                   </Box>
                   <Typography variant="h3" color="primary">
                     {calculation.items?.length || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    produtos diferentes podem ser produzidos
+                    different products can be produced
                   </Typography>
                 </CardContent>
               </Card>
@@ -91,13 +91,13 @@ function ProductionCalculation() {
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={1}>
                     <TrendingUpIcon color="success" sx={{ mr: 1 }} />
-                    <Typography variant="h6">Valor Total</Typography>
+                    <Typography variant="h6">Total Value</Typography>
                   </Box>
                   <Typography variant="h3" color="success.main">
-                    R$ {parseFloat(calculation.totalValue || 0).toFixed(2)}
+                    $ {parseFloat(calculation.totalValue || 0).toFixed(2)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    valor total da produção sugerida
+                    total value of suggested production
                   </Typography>
                 </CardContent>
               </Card>
@@ -108,22 +108,22 @@ function ProductionCalculation() {
           <Paper>
             <Box p={2} bgcolor="primary.main" color="white">
               <Typography variant="h6">
-                Produtos Sugeridos para Produção
+                Suggested Products for Production
               </Typography>
               <Typography variant="body2">
-                Ordenados por maior valor (prioridade)
+                Sorted by highest value (priority)
               </Typography>
             </Box>
             <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Prioridade</TableCell>
-                    <TableCell>Código</TableCell>
-                    <TableCell>Produto</TableCell>
-                    <TableCell align="right">Valor Unitário</TableCell>
-                    <TableCell align="right">Quantidade</TableCell>
-                    <TableCell align="right">Valor Total</TableCell>
+                    <TableCell>Priority</TableCell>
+                    <TableCell>Code</TableCell>
+                    <TableCell>Product</TableCell>
+                    <TableCell align="right">Unit Value</TableCell>
+                    <TableCell align="right">Quantity</TableCell>
+                    <TableCell align="right">Total Value</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -151,7 +151,7 @@ function ProductionCalculation() {
                         </TableCell>
                         <TableCell>{item.productName}</TableCell>
                         <TableCell align="right">
-                          R$ {parseFloat(item.unitValue || 0).toFixed(2)}
+                          $ {parseFloat(item.unitValue || 0).toFixed(2)}
                         </TableCell>
                         <TableCell align="right">
                           <Typography variant="body1" fontWeight="bold">
@@ -164,7 +164,7 @@ function ProductionCalculation() {
                             fontWeight="bold" 
                             color="success.main"
                           >
-                            R$ {parseFloat(item.totalValue || 0).toFixed(2)}
+                            $ {parseFloat(item.totalValue || 0).toFixed(2)}
                           </Typography>
                         </TableCell>
                       </TableRow>
@@ -174,11 +174,11 @@ function ProductionCalculation() {
                       <TableCell colSpan={6} align="center">
                         <Box py={4}>
                           <Typography variant="h6" color="text.secondary" gutterBottom>
-                            Nenhum produto pode ser produzido
+                            No products can be produced
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Verifique se há matérias-primas em estoque e se os produtos
-                            possuem matérias-primas associadas.
+                            Check if there are raw materials in stock and if products
+                            have raw materials associated.
                           </Typography>
                         </Box>
                       </TableCell>
@@ -193,11 +193,11 @@ function ProductionCalculation() {
           {calculation.items && calculation.items.length > 0 && (
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2">
-                <strong>Algoritmo de Priorização:</strong> O sistema calcula a quantidade
-                máxima de cada produto que pode ser produzida com as matérias-primas
-                disponíveis e prioriza os produtos de maior valor. Uma vez que uma
-                matéria-prima é alocada para um produto, ela não está mais disponível
-                para outros produtos.
+                <strong>Prioritization Algorithm:</strong> The system calculates the
+                maximum quantity of each product that can be produced with available
+                raw materials and prioritizes the highest value products. Once a raw
+                material is allocated to a product, it is no longer available for
+                other products.
               </Typography>
             </Alert>
           )}

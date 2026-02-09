@@ -27,6 +27,6 @@ test('renders without crashing', () => {
   );
   
   // Check if the app title is rendered
-  const titleElement = screen.getByText(/Sistema de Controle/i);
+  const titleElement = screen.getByText(/Inventory and Production/i);
   expect(titleElement).toBeInTheDocument();
 });

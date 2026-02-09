@@ -70,10 +70,10 @@ function RawMaterials() {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.code.trim()) errors.code = 'Código é obrigatório';
-    if (!formData.name.trim()) errors.name = 'Nome é obrigatório';
+    if (!formData.code.trim()) errors.code = 'Code is required';
+    if (!formData.name.trim()) errors.name = 'Name is required';
     if (formData.stockQuantity === '' || parseFloat(formData.stockQuantity) < 0) {
-      errors.stockQuantity = 'Quantidade deve ser zero ou positiva';
+      errors.stockQuantity = 'Quantity must be zero or positive';
     }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -99,16 +99,16 @@ function RawMaterials() {
       }
       handleCloseDialog();
     } catch (err) {
-      setFormErrors({ submit: err.message || 'Erro ao salvar matéria-prima' });
+      setFormErrors({ submit: err.message || 'Error saving raw material' });
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Tem certeza que deseja excluir esta matéria-prima?')) {
+    if (window.confirm('Are you sure you want to delete this raw material?')) {
       try {
         await dispatch(deleteRawMaterial(id)).unwrap();
       } catch (err) {
-        alert('Erro ao excluir matéria-prima: ' + err.message);
+        alert('Error deleting raw material: ' + err.message);
       }
     }
   };
@@ -125,14 +125,14 @@ function RawMaterials() {
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
-          Matérias-primas
+          Raw Materials
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog()}
         >
-          Nova Matéria-prima
+          New Raw Material
         </Button>
       </Box>
 
@@ -146,10 +146,10 @@ function RawMaterials() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Código</TableCell>
-              <TableCell>Nome</TableCell>
-              <TableCell align="right">Quantidade em Estoque</TableCell>
-              <TableCell align="center">Ações</TableCell>
+              <TableCell>Code</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell align="right">Stock Quantity</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -183,7 +183,7 @@ function RawMaterials() {
             {rawMaterials.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} align="center">
-                  Nenhuma matéria-prima cadastrada
+                  No raw materials registered
                 </TableCell>
               </TableRow>
             )}
@@ -194,12 +194,12 @@ function RawMaterials() {
       {/* Form Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {selectedRawMaterial ? 'Editar Matéria-prima' : 'Nova Matéria-prima'}
+          {selectedRawMaterial ? 'Edit Raw Material' : 'New Raw Material'}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
-              label="Código"
+              label="Code"
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value })}
               error={!!formErrors.code}
@@ -208,7 +208,7 @@ function RawMaterials() {
               required
             />
             <TextField
-              label="Nome"
+              label="Name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               error={!!formErrors.name}
@@ -217,7 +217,7 @@ function RawMaterials() {
               required
             />
             <TextField
-              label="Quantidade em Estoque"
+              label="Stock Quantity"
               type="number"
               value={formData.stockQuantity}
               onChange={(e) => setFormData({ ...formData, stockQuantity: e.target.value })}
@@ -233,9 +233,9 @@ function RawMaterials() {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button onClick={handleSubmit} variant="contained">
-            Salvar
+            Save
           </Button>
         </DialogActions>
       </Dialog>

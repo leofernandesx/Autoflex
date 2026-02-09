@@ -25,9 +25,9 @@ import {
 const drawerWidth = 240;
 
 const menuItems = [
-  { text: 'Produtos', path: '/products', icon: <CategoryIcon /> },
-  { text: 'Matérias-primas', path: '/raw-materials', icon: <InventoryIcon /> },
-  { text: 'Cálculo de Produção', path: '/production', icon: <CalculateIcon /> },
+  { text: 'Products', path: '/products', icon: <CategoryIcon /> },
+  { text: 'Raw Materials', path: '/raw-materials', icon: <InventoryIcon /> },
+  { text: 'Production Calculation', path: '/production', icon: <CalculateIcon /> },
 ];
 
 function Layout({ children }) {
@@ -91,7 +91,7 @@ function Layout({ children }) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Sistema de Controle de Estoque e Produção
+            Inventory and Production Control System
           </Typography>
         </Toolbar>
       </AppBar>

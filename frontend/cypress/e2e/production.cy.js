@@ -4,28 +4,28 @@ describe('Production Calculation', () => {
   });
 
   it('should display production calculation page', () => {
-    cy.contains('Cálculo de Produção').should('be.visible');
-    cy.contains('Recalcular').should('be.visible');
+    cy.contains('Production Calculation').should('be.visible');
+    cy.contains('Recalculate').should('be.visible');
   });
 
   it('should display summary cards', () => {
-    cy.contains('Total de Produtos').should('be.visible');
-    cy.contains('Valor Total').should('be.visible');
+    cy.contains('Total Products').should('be.visible');
+    cy.contains('Total Value').should('be.visible');
   });
 
   it('should display production table', () => {
-    cy.contains('Produtos Sugeridos para Produção').should('be.visible');
+    cy.contains('Suggested Products for Production').should('be.visible');
   });
 
   it('should allow recalculation', () => {
-    cy.contains('button', 'Recalcular').click();
+    cy.contains('button', 'Recalculate').click();
     
     // Should show loading state or updated results
-    cy.contains('Produtos Sugeridos para Produção').should('be.visible');
+    cy.contains('Suggested Products for Production').should('be.visible');
   });
 
   it('should show empty state when no production possible', () => {
     // This test assumes no products/materials are configured
-    cy.contains('Nenhum produto pode ser produzido', { timeout: 10000 }).should('exist');
+    cy.contains('No products can be produced', { timeout: 10000 }).should('exist');
   });
 });

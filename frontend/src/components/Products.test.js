@@ -40,7 +40,7 @@ describe('Products Component', () => {
     renderWithProviders(<Products />);
     
     await waitFor(() => {
-      expect(screen.getByText('Produtos')).toBeInTheDocument();
+      expect(screen.getByText('Products')).toBeInTheDocument();
     });
   });
 
@@ -48,7 +48,7 @@ describe('Products Component', () => {
     renderWithProviders(<Products />);
     
     await waitFor(() => {
-      expect(screen.getByText('Novo Produto')).toBeInTheDocument();
+      expect(screen.getByText('New Product')).toBeInTheDocument();
     });
   });
 
@@ -56,7 +56,7 @@ describe('Products Component', () => {
     renderWithProviders(<Products />);
     
     await waitFor(() => {
-      expect(screen.getByText('Nenhum produto cadastrado')).toBeInTheDocument();
+      expect(screen.getByText('No products registered')).toBeInTheDocument();
     });
   });
 });

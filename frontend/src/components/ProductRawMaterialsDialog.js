@@ -26,11 +26,14 @@ import {
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
+  Edit as EditIcon,
   Save as SaveIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import {
   fetchProductRawMaterialsByProductId,
   createProductRawMaterial,
+  updateProductRawMaterial,
   deleteProductRawMaterial,
 } from '../store/slices/productRawMaterialsSlice';
 import { fetchRawMaterials } from '../store/slices/rawMaterialsSlice';
@@ -44,22 +47,26 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
     requiredQuantity: '',
   });
   const [error, setError] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editQuantity, setEditQuantity] = useState('');
 
   useEffect(() => {
     if (open && product) {
       dispatch(fetchProductRawMaterialsByProductId(product.id));
       dispatch(fetchRawMaterials());
+      setEditingId(null);
+      setEditQuantity('');
     }
   }, [open, product, dispatch]);
 
   const handleAddAssociation = async () => {
     if (!newAssociation.rawMaterialId || !newAssociation.requiredQuantity) {
-      setError('Preencha todos os campos');
+      setError('Fill in all fields');
       return;
     }
 
     if (parseFloat(newAssociation.requiredQuantity) <= 0) {
-      setError('Quantidade deve ser maior que zero');
+      setError('Quantity must be greater than zero');
       return;
     }
 
@@ -68,7 +75,7 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
       (a) => a.rawMaterialId === newAssociation.rawMaterialId
     );
     if (exists) {
-      setError('Esta matéria-prima já está associada a este produto');
+      setError('This raw material is already associated with this product');
       return;
     }
 
@@ -83,17 +90,53 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
       setNewAssociation({ rawMaterialId: '', requiredQuantity: '' });
       setError('');
     } catch (err) {
-      setError(err.message || 'Erro ao adicionar associação');
+      setError(err.message || 'Error adding association');
     }
   };
 
   const handleDeleteAssociation = async (id) => {
-    if (window.confirm('Tem certeza que deseja remover esta matéria-prima?')) {
+    if (window.confirm('Are you sure you want to remove this raw material?')) {
       try {
         await dispatch(deleteProductRawMaterial(id)).unwrap();
       } catch (err) {
-        setError(err.message || 'Erro ao remover associação');
+        setError(err.message || 'Error removing association');
       }
+    }
+  };
+
+  const handleStartEdit = (assoc) => {
+    setEditingId(assoc.id);
+    setEditQuantity(assoc.requiredQuantity?.toString() || '');
+    setError('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditQuantity('');
+  };
+
+  const handleSaveEdit = async () => {
+    const quantity = parseFloat(editQuantity);
+    if (isNaN(quantity) || quantity <= 0) {
+      setError('Quantity must be greater than zero');
+      return;
+    }
+
+    try {
+      await dispatch(
+        updateProductRawMaterial({
+          id: editingId,
+          data: {
+            productId: product.id,
+            rawMaterialId: associations.find((a) => a.id === editingId)?.rawMaterialId,
+            requiredQuantity: quantity,
+          },
+        })
+      ).unwrap();
+      handleCancelEdit();
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Error updating association');
     }
   };
 
@@ -105,7 +148,7 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        Matérias-primas do Produto: {product?.name}
+        Product Raw Materials: {product?.name}
       </DialogTitle>
       <DialogContent>
         <Box sx={{ pt: 2 }}>
@@ -117,41 +160,87 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
 
           {/* Existing Associations */}
           <Typography variant="h6" gutterBottom>
-            Matérias-primas Associadas
+            Associated Raw Materials
           </Typography>
           <TableContainer component={Paper} sx={{ mb: 3 }}>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Código</TableCell>
-                  <TableCell>Nome</TableCell>
-                  <TableCell align="right">Qtd. Necessária</TableCell>
-                  <TableCell align="center">Ações</TableCell>
+                  <TableCell>Code</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell align="right">Required Qty</TableCell>
+                  <TableCell align="center">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {associations.map((assoc) => (
-                  <TableRow key={assoc.id}>
-                    <TableCell>{assoc.rawMaterialName?.split(' - ')[0] || '-'}</TableCell>
-                    <TableCell>{assoc.rawMaterialName || '-'}</TableCell>
-                    <TableCell align="right">
-                      {parseFloat(assoc.requiredQuantity).toFixed(3)}
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDeleteAssociation(assoc.id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {associations.map((assoc) => {
+                  const isEditing = editingId === assoc.id;
+                  return (
+                    <TableRow key={assoc.id}>
+                      <TableCell>{assoc.rawMaterialName?.split(' - ')[0] || '-'}</TableCell>
+                      <TableCell>{assoc.rawMaterialName || '-'}</TableCell>
+                      <TableCell align="right">
+                        {isEditing ? (
+                          <TextField
+                            size="small"
+                            type="number"
+                            value={editQuantity}
+                            onChange={(e) => setEditQuantity(e.target.value)}
+                            inputProps={{ step: '0.001', min: '0' }}
+                            sx={{ width: 120 }}
+                            autoFocus
+                          />
+                        ) : (
+                          parseFloat(assoc.requiredQuantity).toFixed(3)
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        {isEditing ? (
+                          <>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={handleSaveEdit}
+                              title="Save"
+                            >
+                              <SaveIcon />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={handleCancelEdit}
+                              title="Cancel"
+                            >
+                              <CloseIcon />
+                            </IconButton>
+                          </>
+                        ) : (
+                          <>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => handleStartEdit(assoc)}
+                              title="Edit quantity"
+                            >
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleDeleteAssociation(assoc.id)}
+                              title="Remove"
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                 {associations.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={4} align="center">
-                      Nenhuma matéria-prima associada
+                      No raw materials associated
                     </TableCell>
                   </TableRow>
                 )}
@@ -161,12 +250,12 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
 
           {/* Add New Association */}
           <Typography variant="h6" gutterBottom>
-            Adicionar Matéria-prima
+            Add Raw Material
           </Typography>
           <Paper sx={{ p: 2 }}>
             <Box display="flex" gap={2} alignItems="flex-start">
               <FormControl fullWidth>
-                <InputLabel>Matéria-prima</InputLabel>
+                <InputLabel>Raw Material</InputLabel>
                 <Select
                   value={newAssociation.rawMaterialId}
                   onChange={(e) =>
@@ -175,7 +264,7 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
                       rawMaterialId: e.target.value,
                     })
                   }
-                  label="Matéria-prima"
+                  label="Raw Material"
                 >
                   {getAvailableRawMaterials().map((rm) => (
                     <MenuItem key={rm.id} value={rm.id}>
@@ -185,7 +274,7 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
                 </Select>
               </FormControl>
               <TextField
-                label="Quantidade Necessária"
+                label="Required Quantity"
                 type="number"
                 value={newAssociation.requiredQuantity}
                 onChange={(e) =>
@@ -203,14 +292,14 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
                 onClick={handleAddAssociation}
                 disabled={!newAssociation.rawMaterialId || !newAssociation.requiredQuantity}
               >
-                Adicionar
+                Add
               </Button>
             </Box>
           </Paper>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Fechar</Button>
+        <Button onClick={onClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );
