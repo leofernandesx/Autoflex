@@ -10,6 +10,16 @@ O fluxo é bem direto: você cadastra as matérias-primas (código, nome e quant
 
 O backend é uma API REST em Java com Quarkus, usando Hibernate Panache e H2 em memória por padrão (ou PostgreSQL se você configurar). O frontend é React com Redux para o estado, Material-UI para a interface e React Router para navegação. Os testes incluem JUnit e REST Assured no backend, e Jest e Cypress no frontend.
 
+## Acesso em produção (VPS)
+
+O sistema está disponível em:
+
+- **Aplicação:** http://157.245.185.151:3000
+- **API (Swagger):** http://157.245.185.151:3000/swagger-ui
+- **API base:** http://157.245.185.151:3000/api
+
+O banco está populado com dados de demonstração para avaliação.
+
 ## Como rodar
 
 ### Opção 1: Desenvolvimento local (mais rápido)
