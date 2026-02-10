@@ -31,6 +31,7 @@ public class ProductRawMaterialResource {
     @GET
     @Path("/{id}")
     public Response findById(@PathParam("id") Long id) {
+        validateId(id);
         LOG.debug("GET /api/product-raw-materials/" + id);
         ProductRawMaterialDTO association = productRawMaterialService.findById(id);
         return Response.ok(association).build();
@@ -39,6 +40,7 @@ public class ProductRawMaterialResource {
     @GET
     @Path("/product/{productId}")
     public Response findByProductId(@PathParam("productId") Long productId) {
+        validateId(productId);
         LOG.debug("GET /api/product-raw-materials/product/" + productId);
         List<ProductRawMaterialDTO> associations = productRawMaterialService.findByProductId(productId);
         return Response.ok(associations).build();
@@ -47,6 +49,7 @@ public class ProductRawMaterialResource {
     @GET
     @Path("/raw-material/{rawMaterialId}")
     public Response findByRawMaterialId(@PathParam("rawMaterialId") Long rawMaterialId) {
+        validateId(rawMaterialId);
         LOG.debug("GET /api/product-raw-materials/raw-material/" + rawMaterialId);
         List<ProductRawMaterialDTO> associations = productRawMaterialService.findByRawMaterialId(rawMaterialId);
         return Response.ok(associations).build();
@@ -62,6 +65,7 @@ public class ProductRawMaterialResource {
     @PUT
     @Path("/{id}")
     public Response update(@PathParam("id") Long id, @Valid ProductRawMaterialDTO dto) {
+        validateId(id);
         LOG.debug("PUT /api/product-raw-materials/" + id + " - Update association");
         ProductRawMaterialDTO updated = productRawMaterialService.update(id, dto);
         return Response.ok(updated).build();
@@ -70,8 +74,15 @@ public class ProductRawMaterialResource {
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id") Long id) {
+        validateId(id);
         LOG.debug("DELETE /api/product-raw-materials/" + id);
         productRawMaterialService.delete(id);
         return Response.noContent().build();
+    }
+
+    private void validateId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid id: must be a positive number");
+        }
     }
 }

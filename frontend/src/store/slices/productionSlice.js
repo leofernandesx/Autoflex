@@ -29,7 +29,7 @@ const productionSlice = createSlice({
       })
       .addCase(calculateProduction.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error?.userMessage || action.error?.message;
       });
   },
 });

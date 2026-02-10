@@ -11,17 +11,25 @@ export const fetchProducts = createAsyncThunk(
 
 export const createProduct = createAsyncThunk(
   'products/create',
-  async (product) => {
-    const response = await productsApi.create(product);
-    return response.data;
+  async (product, { rejectWithValue }) => {
+    try {
+      const response = await productsApi.create(product);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.userMessage || err.message || 'Error creating product');
+    }
   }
 );
 
 export const updateProduct = createAsyncThunk(
   'products/update',
-  async ({ id, data }) => {
-    const response = await productsApi.update(id, data);
-    return response.data;
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const response = await productsApi.update(id, data);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.userMessage || err.message || 'Error updating product');
+    }
   }
 );
 
@@ -54,7 +62,7 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error?.userMessage || action.error?.message;
       })
       // Create product
       .addCase(createProduct.fulfilled, (state, action) => {

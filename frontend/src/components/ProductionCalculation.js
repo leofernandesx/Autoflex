@@ -16,6 +16,7 @@ import {
   Card,
   CardContent,
   Grid,
+  Skeleton,
 } from '@mui/material';
 import {
   Calculate as CalculateIcon,
@@ -29,8 +30,8 @@ function ProductionCalculation() {
   const { calculation, loading, error } = useSelector((state) => state.production);
 
   useEffect(() => {
-    handleCalculate();
-  }, []);
+    dispatch(calculateProduction());
+  }, [dispatch]);
 
   const handleCalculate = () => {
     dispatch(calculateProduction());
@@ -38,8 +39,19 @@ function ProductionCalculation() {
 
   if (loading && !calculation) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
+      <Box>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h4" component="h1">Production Calculation</Typography>
+        </Box>
+        <Grid container spacing={3} mb={3}>
+          <Grid item xs={12} md={6}>
+            <Card><CardContent><Box sx={{ mb: 1 }}><Typography variant="h6">Total Products</Typography></Box><Typography variant="h3"><Skeleton width={80} /></Typography></CardContent></Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card><CardContent><Box sx={{ mb: 1 }}><Typography variant="h6">Total Value</Typography></Box><Typography variant="h3"><Skeleton width={120} /></Typography></CardContent></Card>
+          </Grid>
+        </Grid>
+        <Paper><Box p={2}><Skeleton variant="text" width="60%" /><Skeleton variant="text" width="40%" /></Box><TableContainer><Table><TableHead><TableRow><TableCell>Priority</TableCell><TableCell>Code</TableCell><TableCell>Product</TableCell><TableCell>Unit Value</TableCell><TableCell>Quantity</TableCell><TableCell>Total Value</TableCell></TableRow></TableHead><TableBody>{[1,2,3,4,5].map(i=><TableRow key={i}><TableCell><Skeleton /></TableCell><TableCell><Skeleton /></TableCell><TableCell><Skeleton /></TableCell><TableCell><Skeleton /></TableCell><TableCell><Skeleton /></TableCell><TableCell><Skeleton /></TableCell></TableRow>)}</TableBody></Table></TableContainer></Paper>
       </Box>
     );
   }

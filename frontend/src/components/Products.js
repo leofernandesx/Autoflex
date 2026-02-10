@@ -18,8 +18,13 @@ import {
   DialogActions,
   TextField,
   Alert,
-  CircularProgress,
+  Skeleton,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Divider,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -33,16 +38,28 @@ import {
   updateProduct,
   deleteProduct,
 } from '../store/slices/productsSlice';
+import {
+  fetchRawMaterials,
+} from '../store/slices/rawMaterialsSlice';
+import {
+  createProductRawMaterial,
+} from '../store/slices/productRawMaterialsSlice';
+import { showSnackbar } from '../store/slices/snackbarSlice';
 import ProductRawMaterialsDialog from './ProductRawMaterialsDialog';
+import ConfirmDialog from './ConfirmDialog';
 
 function Products() {
   const dispatch = useDispatch();
   const { items: products, loading, error } = useSelector((state) => state.products);
+  const { items: rawMaterials } = useSelector((state) => state.rawMaterials);
   const [openDialog, setOpenDialog] = useState(false);
   const [openRawMaterialsDialog, setOpenRawMaterialsDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [formData, setFormData] = useState({ code: '', name: '', value: '' });
   const [formErrors, setFormErrors] = useState({});
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: null });
+  const [pendingRawMaterials, setPendingRawMaterials] = useState([]);
+  const [newRawMaterial, setNewRawMaterial] = useState({ rawMaterialId: '', requiredQuantity: '' });
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -56,9 +73,13 @@ function Products() {
         name: product.name,
         value: product.value.toString(),
       });
+      setPendingRawMaterials([]);
     } else {
       setSelectedProduct(null);
       setFormData({ code: '', name: '', value: '' });
+      setPendingRawMaterials([]);
+      setNewRawMaterial({ rawMaterialId: '', requiredQuantity: '' });
+      dispatch(fetchRawMaterials());
     }
     setFormErrors({});
     setOpenDialog(true);
@@ -69,6 +90,25 @@ function Products() {
     setSelectedProduct(null);
     setFormData({ code: '', name: '', value: '' });
     setFormErrors({});
+    setPendingRawMaterials([]);
+  };
+
+  const handleAddPendingRawMaterial = () => {
+    if (!newRawMaterial.rawMaterialId || !newRawMaterial.requiredQuantity) return;
+    const qty = parseFloat(newRawMaterial.requiredQuantity);
+    if (isNaN(qty) || qty <= 0) return;
+    const rm = rawMaterials.find((r) => r.id === Number(newRawMaterial.rawMaterialId));
+    if (!rm) return;
+    if (pendingRawMaterials.some((p) => p.rawMaterialId === rm.id)) return;
+    setPendingRawMaterials([
+      ...pendingRawMaterials,
+      { rawMaterialId: rm.id, rawMaterialName: `${rm.code} - ${rm.name}`, requiredQuantity: qty },
+    ]);
+    setNewRawMaterial({ rawMaterialId: '', requiredQuantity: '' });
+  };
+
+  const handleRemovePendingRawMaterial = (rawMaterialId) => {
+    setPendingRawMaterials(pendingRawMaterials.filter((p) => p.rawMaterialId !== rawMaterialId));
   };
 
   const validateForm = () => {
@@ -94,23 +134,49 @@ function Products() {
     try {
       if (selectedProduct) {
         await dispatch(updateProduct({ id: selectedProduct.id, data: productData })).unwrap();
+        dispatch(showSnackbar({ message: 'Product updated successfully', severity: 'success' }));
       } else {
-        await dispatch(createProduct(productData)).unwrap();
+        const created = await dispatch(createProduct(productData)).unwrap();
+        for (const prm of pendingRawMaterials) {
+          await dispatch(
+            createProductRawMaterial({
+              productId: created.id,
+              rawMaterialId: prm.rawMaterialId,
+              requiredQuantity: prm.requiredQuantity,
+            })
+          ).unwrap();
+        }
+        const msg =
+          pendingRawMaterials.length > 0
+            ? `Product created with ${pendingRawMaterials.length} raw material(s)`
+            : 'Product created successfully';
+        dispatch(showSnackbar({ message: msg, severity: 'success' }));
       }
       handleCloseDialog();
     } catch (err) {
-      setFormErrors({ submit: err.message || 'Error saving product' });
+      const msg = typeof err === 'string' ? err : (err?.userMessage || err?.message || 'Error saving product');
+      setFormErrors({ submit: msg });
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await dispatch(deleteProduct(id)).unwrap();
-      } catch (err) {
-        alert('Error deleting product: ' + err.message);
-      }
+  const handleDeleteClick = (id) => {
+    setDeleteConfirm({ open: true, id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm.id) return;
+    try {
+      await dispatch(deleteProduct(deleteConfirm.id)).unwrap();
+      dispatch(showSnackbar({ message: 'Product deleted successfully', severity: 'success' }));
+      setDeleteConfirm({ open: false, id: null });
+    } catch (err) {
+      dispatch(showSnackbar({ message: err.userMessage || err.message || 'Error deleting product', severity: 'error' }));
+      setDeleteConfirm({ open: false, id: null });
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ open: false, id: null });
   };
 
   const handleOpenRawMaterials = (product) => {
@@ -125,8 +191,35 @@ function Products() {
 
   if (loading && products.length === 0) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
+      <Box>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Skeleton variant="text" width={200} height={40} />
+          <Skeleton variant="rectangular" width={150} height={40} />
+        </Box>
+        <Paper>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Code</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell align="right">Value</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton variant="text" /></TableCell>
+                    <TableCell><Skeleton variant="text" /></TableCell>
+                    <TableCell><Skeleton variant="text" /></TableCell>
+                    <TableCell><Skeleton variant="circular" width={32} height={32} /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
       </Box>
     );
   }
@@ -191,7 +284,7 @@ function Products() {
                   <IconButton
                     size="small"
                     color="error"
-                    onClick={() => handleDelete(product.id)}
+                    onClick={() => handleDeleteClick(product.id)}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -201,7 +294,21 @@ function Products() {
             {products.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} align="center">
-                  No products registered
+                  <Box py={4}>
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No products registered
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Add your first product to get started
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={() => handleOpenDialog()}
+                    >
+                      Add your first product
+                    </Button>
+                  </Box>
                 </TableCell>
               </TableRow>
             )}
@@ -247,6 +354,80 @@ function Products() {
                 startAdornment: '$',
               }}
             />
+
+            {!selectedProduct && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  Required raw materials (optional)
+                </Typography>
+                <Box display="flex" gap={1} alignItems="flex-start" flexWrap="wrap">
+                  <FormControl sx={{ minWidth: 200 }} size="small">
+                    <InputLabel>Raw material</InputLabel>
+                    <Select
+                      value={newRawMaterial.rawMaterialId}
+                      onChange={(e) =>
+                        setNewRawMaterial({ ...newRawMaterial, rawMaterialId: e.target.value })
+                      }
+                      label="Raw material"
+                    >
+                      {rawMaterials
+                        .filter(
+                          (rm) => !pendingRawMaterials.some((p) => p.rawMaterialId === rm.id)
+                        )
+                        .map((rm) => (
+                          <MenuItem key={rm.id} value={rm.id}>
+                            {rm.code} - {rm.name}
+                          </MenuItem>
+                        ))}
+                      {rawMaterials.filter(
+                        (rm) => !pendingRawMaterials.some((p) => p.rawMaterialId === rm.id)
+                      ).length === 0 && (
+                        <MenuItem disabled>None available</MenuItem>
+                      )}
+                    </Select>
+                  </FormControl>
+                  <TextField
+                    label="Required quantity"
+                    type="number"
+                    size="small"
+                    value={newRawMaterial.requiredQuantity}
+                    onChange={(e) =>
+                      setNewRawMaterial({ ...newRawMaterial, requiredQuantity: e.target.value })
+                    }
+                    inputProps={{ step: '0.001', min: '0' }}
+                    sx={{ width: 130 }}
+                  />
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={handleAddPendingRawMaterial}
+                    disabled={
+                      !newRawMaterial.rawMaterialId ||
+                      !newRawMaterial.requiredQuantity ||
+                      parseFloat(newRawMaterial.requiredQuantity) <= 0
+                    }
+                  >
+                    Add
+                  </Button>
+                </Box>
+                {pendingRawMaterials.length > 0 && (
+                  <Box sx={{ mt: 1 }}>
+                    {pendingRawMaterials.map((prm) => (
+                      <Chip
+                        key={prm.rawMaterialId}
+                        label={`${prm.rawMaterialName}: ${parseFloat(prm.requiredQuantity).toFixed(3)}`}
+                        onDelete={() => handleRemovePendingRawMaterial(prm.rawMaterialId)}
+                        size="small"
+                        sx={{ mr: 0.5, mb: 0.5 }}
+                      />
+                    ))}
+                  </Box>
+                )}
+              </>
+            )}
+
             {formErrors.submit && (
               <Alert severity="error">{formErrors.submit}</Alert>
             )}
@@ -268,6 +449,16 @@ function Products() {
           product={selectedProduct}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </Box>
   );
 }

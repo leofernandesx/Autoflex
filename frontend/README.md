@@ -2,7 +2,7 @@
 
 Interface web responsiva desenvolvida com React para gerenciamento de produtos, matérias-primas e visualização de produção.
 
-## 🚀 Tecnologias
+## Tecnologias
 
 - **React 18** - Biblioteca JavaScript para UI
 - **Redux Toolkit** - Gerenciamento de estado
@@ -13,20 +13,20 @@ Interface web responsiva desenvolvida com React para gerenciamento de produtos, 
 - **React Testing Library** - Testes de componentes
 - **Cypress** - Testes E2E
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
 - Node.js 18+ 
 - npm ou yarn
 - Backend rodando em `http://localhost:8080`
 
-## 🔧 Instalação
+## Instalação
 
 ```bash
 # Instalar dependências
 npm install
 ```
 
-## ▶️ Executar
+## Executar
 
 ### Modo Desenvolvimento
 
@@ -44,7 +44,7 @@ npm run build
 
 Arquivos otimizados em `build/`
 
-## 🧪 Testes
+## Testes
 
 ### Testes Unitários
 
@@ -68,7 +68,7 @@ npm run cypress:run
 
 **Importante:** Backend deve estar rodando antes de executar testes Cypress!
 
-## 🎨 Funcionalidades
+## Funcionalidades
 
 ### 1. Gestão de Produtos
 - Listar produtos com código, nome e valor
@@ -94,14 +94,14 @@ npm run cypress:run
 - Indicadores de quantidade e valor total
 - Recálculo em tempo real
 
-## 📱 Responsividade
+## Responsividade
 
 O sistema é totalmente responsivo e funciona em:
-- 📱 Mobile (320px+)
-- 📱 Tablet (768px+)
-- 💻 Desktop (1024px+)
+- Mobile (320px+)
+- Tablet (768px+)
+- Desktop (1024px+)
 
-## 🏗️ Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 src/
@@ -124,7 +124,7 @@ src/
 └── index.js             # Entry point
 ```
 
-## 🔗 Integração com Backend
+## Integração com Backend
 
 ### Configuração da API
 
@@ -152,7 +152,7 @@ rawMaterialsApi.create(data)
 productionApi.calculate()
 ```
 
-## 🎯 Fluxo de Uso
+## Fluxo de Uso
 
 1. **Cadastrar Matérias-primas**
    - Navegar para "Matérias-primas"
@@ -165,7 +165,7 @@ productionApi.calculate()
    - Preencher código, nome e valor
 
 3. **Associar Matérias-primas**
-   - Na lista de produtos, clicar no ícone de configuração (⚙️)
+   - Na lista de produtos, clicar no ícone de configuração
    - Selecionar matéria-prima e quantidade necessária
    - Clicar em "Adicionar"
 
@@ -174,7 +174,7 @@ productionApi.calculate()
    - Ver produtos sugeridos priorizados por valor
    - Recalcular quando necessário
 
-## 🎨 Temas e Estilos
+## Temas e Estilos
 
 O sistema usa Material-UI com tema customizado:
 
@@ -187,7 +187,7 @@ O sistema usa Material-UI com tema customizado:
 }
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Erro de CORS
 
@@ -209,7 +209,7 @@ quarkus.http.cors.origins=http://localhost:3000
 2. Frontend deve estar rodando
 3. Banco de dados deve estar acessível
 
-## 📊 Estado da Aplicação (Redux)
+## Estado da Aplicação (Redux)
 
 ```javascript
 {
@@ -228,7 +228,7 @@ quarkus.http.cors.origins=http://localhost:3000
 }
 ```
 
-## 🚀 Deploy
+## Deploy
 
 ### Build
 
@@ -246,6 +246,6 @@ npx serve -s build -l 3000
 # Copiar build/ para /var/www/html
 ```
 
-## 📄 Licença
+## Licença
 
 Autoflex © 2024

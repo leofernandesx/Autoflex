@@ -31,6 +31,7 @@ public class RawMaterialResource {
     @GET
     @Path("/{id}")
     public Response findById(@PathParam("id") Long id) {
+        validateId(id);
         LOG.debug("GET /api/raw-materials/" + id);
         RawMaterialDTO rawMaterial = rawMaterialService.findById(id);
         return Response.ok(rawMaterial).build();
@@ -54,6 +55,7 @@ public class RawMaterialResource {
     @PUT
     @Path("/{id}")
     public Response update(@PathParam("id") Long id, @Valid RawMaterialDTO dto) {
+        validateId(id);
         LOG.debug("PUT /api/raw-materials/" + id + " - Update raw material");
         RawMaterialDTO updated = rawMaterialService.update(id, dto);
         return Response.ok(updated).build();
@@ -62,8 +64,15 @@ public class RawMaterialResource {
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id") Long id) {
+        validateId(id);
         LOG.debug("DELETE /api/raw-materials/" + id);
         rawMaterialService.delete(id);
         return Response.noContent().build();
+    }
+
+    private void validateId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid id: must be a positive number");
+        }
     }
 }

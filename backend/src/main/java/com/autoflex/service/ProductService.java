@@ -2,6 +2,7 @@ package com.autoflex.service;
 
 import com.autoflex.dto.ProductDTO;
 import com.autoflex.entity.Product;
+import com.autoflex.exception.ConflictException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
@@ -40,10 +41,13 @@ public class ProductService {
         // Check if code already exists
         Product existing = Product.findByCode(dto.code);
         if (existing != null) {
-            throw new IllegalArgumentException("Product with code " + dto.code + " already exists");
+            throw new ConflictException("Product with code " + dto.code + " already exists");
         }
 
-        Product product = dto.toEntity();
+        Product product = new Product();
+        product.code = dto.code;
+        product.name = dto.name;
+        product.value = dto.value;
         product.persist();
         return ProductDTO.fromEntity(product);
     }
@@ -59,7 +63,7 @@ public class ProductService {
         if (!product.code.equals(dto.code)) {
             Product existing = Product.findByCode(dto.code);
             if (existing != null && !existing.id.equals(id)) {
-                throw new IllegalArgumentException("Product with code " + dto.code + " already exists");
+                throw new ConflictException("Product with code " + dto.code + " already exists");
             }
         }
 

@@ -10,6 +10,7 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.containsString;
 
 @QuarkusTest
 class ProductResourceTest {
@@ -62,5 +63,30 @@ class ProductResourceTest {
             .when().get("/api/products/99999")
             .then()
             .statusCode(404);
+    }
+
+    @Test
+    void testCreateProductDuplicateCodeReturnsConflict() {
+        String code = "P-DUP-" + System.currentTimeMillis();
+        Map<String, Object> product = new HashMap<>();
+        product.put("code", code);
+        product.put("name", "First Product");
+        product.put("value", new BigDecimal("10.00"));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(product)
+            .when().post("/api/products")
+            .then()
+            .statusCode(201);
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(product)
+            .when().post("/api/products")
+            .then()
+            .statusCode(409)
+            .body("message", equalTo("Conflict"))
+            .body("details", containsString("already exists"));
     }
 }

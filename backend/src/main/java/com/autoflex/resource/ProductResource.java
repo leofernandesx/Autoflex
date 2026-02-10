@@ -31,6 +31,7 @@ public class ProductResource {
     @GET
     @Path("/{id}")
     public Response findById(@PathParam("id") Long id) {
+        validateId(id);
         LOG.debug("GET /api/products/" + id);
         ProductDTO product = productService.findById(id);
         return Response.ok(product).build();
@@ -54,6 +55,7 @@ public class ProductResource {
     @PUT
     @Path("/{id}")
     public Response update(@PathParam("id") Long id, @Valid ProductDTO dto) {
+        validateId(id);
         LOG.debug("PUT /api/products/" + id + " - Update product");
         ProductDTO updated = productService.update(id, dto);
         return Response.ok(updated).build();
@@ -62,8 +64,15 @@ public class ProductResource {
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id") Long id) {
+        validateId(id);
         LOG.debug("DELETE /api/products/" + id);
         productService.delete(id);
         return Response.noContent().build();
+    }
+
+    private void validateId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid id: must be a positive number");
+        }
     }
 }

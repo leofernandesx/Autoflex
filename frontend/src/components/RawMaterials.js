@@ -18,7 +18,7 @@ import {
   DialogActions,
   TextField,
   Alert,
-  CircularProgress,
+  Skeleton,
   Chip,
 } from '@mui/material';
 import {
@@ -32,6 +32,8 @@ import {
   updateRawMaterial,
   deleteRawMaterial,
 } from '../store/slices/rawMaterialsSlice';
+import { showSnackbar } from '../store/slices/snackbarSlice';
+import ConfirmDialog from './ConfirmDialog';
 
 function RawMaterials() {
   const dispatch = useDispatch();
@@ -40,6 +42,7 @@ function RawMaterials() {
   const [selectedRawMaterial, setSelectedRawMaterial] = useState(null);
   const [formData, setFormData] = useState({ code: '', name: '', stockQuantity: '' });
   const [formErrors, setFormErrors] = useState({});
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: null });
 
   useEffect(() => {
     dispatch(fetchRawMaterials());
@@ -94,29 +97,69 @@ function RawMaterials() {
           id: selectedRawMaterial.id, 
           data: rawMaterialData 
         })).unwrap();
+        dispatch(showSnackbar({ message: 'Raw material updated successfully', severity: 'success' }));
       } else {
         await dispatch(createRawMaterial(rawMaterialData)).unwrap();
+        dispatch(showSnackbar({ message: 'Raw material created successfully', severity: 'success' }));
       }
       handleCloseDialog();
     } catch (err) {
-      setFormErrors({ submit: err.message || 'Error saving raw material' });
+      const msg = typeof err === 'string' ? err : (err?.userMessage || err?.message || 'Error saving raw material');
+      setFormErrors({ submit: msg });
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this raw material?')) {
-      try {
-        await dispatch(deleteRawMaterial(id)).unwrap();
-      } catch (err) {
-        alert('Error deleting raw material: ' + err.message);
-      }
+  const handleDeleteClick = (id) => {
+    setDeleteConfirm({ open: true, id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm.id) return;
+    try {
+      await dispatch(deleteRawMaterial(deleteConfirm.id)).unwrap();
+      dispatch(showSnackbar({ message: 'Raw material deleted successfully', severity: 'success' }));
+      setDeleteConfirm({ open: false, id: null });
+    } catch (err) {
+      dispatch(showSnackbar({ message: err.userMessage || err.message || 'Error deleting raw material', severity: 'error' }));
+      setDeleteConfirm({ open: false, id: null });
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ open: false, id: null });
   };
 
   if (loading && rawMaterials.length === 0) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
+      <Box>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Skeleton variant="text" width={200} height={40} />
+          <Skeleton variant="rectangular" width={180} height={40} />
+        </Box>
+        <Paper>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Code</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell align="right">Stock Quantity</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton variant="text" /></TableCell>
+                    <TableCell><Skeleton variant="text" /></TableCell>
+                    <TableCell><Skeleton variant="text" /></TableCell>
+                    <TableCell><Skeleton variant="circular" width={32} height={32} /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
       </Box>
     );
   }
@@ -173,7 +216,7 @@ function RawMaterials() {
                   <IconButton
                     size="small"
                     color="error"
-                    onClick={() => handleDelete(rawMaterial.id)}
+                    onClick={() => handleDeleteClick(rawMaterial.id)}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -183,7 +226,21 @@ function RawMaterials() {
             {rawMaterials.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} align="center">
-                  No raw materials registered
+                  <Box py={4}>
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No raw materials registered
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Add your first raw material to get started
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={() => handleOpenDialog()}
+                    >
+                      Add your first raw material
+                    </Button>
+                  </Box>
                 </TableCell>
               </TableRow>
             )}
@@ -239,6 +296,16 @@ function RawMaterials() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        title="Delete Raw Material"
+        message="Are you sure you want to delete this raw material? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </Box>
   );
 }

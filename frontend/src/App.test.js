@@ -7,6 +7,7 @@ import productsReducer from './store/slices/productsSlice';
 import rawMaterialsReducer from './store/slices/rawMaterialsSlice';
 import productRawMaterialsReducer from './store/slices/productRawMaterialsSlice';
 import productionReducer from './store/slices/productionSlice';
+import snackbarReducer from './store/slices/snackbarSlice';
 
 const mockStore = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const mockStore = configureStore({
     rawMaterials: rawMaterialsReducer,
     productRawMaterials: productRawMaterialsReducer,
     production: productionReducer,
+    snackbar: snackbarReducer,
   },
 });
 

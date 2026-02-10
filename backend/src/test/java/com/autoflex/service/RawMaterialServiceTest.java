@@ -1,7 +1,9 @@
 package com.autoflex.service;
 
 import com.autoflex.dto.RawMaterialDTO;
+import com.autoflex.entity.ProductRawMaterial;
 import com.autoflex.entity.RawMaterial;
+import com.autoflex.exception.ConflictException;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -23,6 +25,7 @@ class RawMaterialServiceTest {
     @BeforeEach
     @Transactional
     void setUp() {
+        ProductRawMaterial.deleteAll();
         RawMaterial.deleteAll();
     }
 
@@ -48,7 +51,7 @@ class RawMaterialServiceTest {
         RawMaterialDTO dto2 = new RawMaterialDTO(null, "RM001", "Iron", new BigDecimal("500.000"));
         
         assertThatThrownBy(() -> rawMaterialService.create(dto2))
-            .isInstanceOf(IllegalArgumentException.class)
+            .isInstanceOf(ConflictException.class)
             .hasMessageContaining("already exists");
     }
 

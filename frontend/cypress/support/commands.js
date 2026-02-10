@@ -16,21 +16,21 @@ Cypress.Commands.add('login', (username, password) => {
 // Command to create a product via UI
 Cypress.Commands.add('createProduct', (code, name, value) => {
   cy.visit('/products');
-  cy.contains('Novo Produto').click();
+  cy.contains('New Product').click();
   cy.get('input[type="text"]').first().type(code);
   cy.get('input[type="text"]').eq(1).type(name);
   cy.get('input[type="number"]').type(value);
-  cy.contains('button', 'Salvar').click();
+  cy.contains('button', 'Save').click();
   cy.wait(500);
 });
 
 // Command to create a raw material via UI
 Cypress.Commands.add('createRawMaterial', (code, name, quantity) => {
   cy.visit('/raw-materials');
-  cy.contains('Nova Matéria-prima').click();
+  cy.contains('New Raw Material').click();
   cy.get('input[type="text"]').first().type(code);
   cy.get('input[type="text"]').eq(1).type(name);
   cy.get('input[type="number"]').type(quantity);
-  cy.contains('button', 'Salvar').click();
+  cy.contains('button', 'Save').click();
   cy.wait(500);
 });

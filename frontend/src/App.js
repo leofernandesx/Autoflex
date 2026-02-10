@@ -5,19 +5,23 @@ import Layout from './components/Layout';
 import Products from './components/Products';
 import RawMaterials from './components/RawMaterials';
 import ProductionCalculation from './components/ProductionCalculation';
+import SnackbarNotification from './components/SnackbarNotification';
 
 function App() {
   return (
-    <Layout>
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/products" replace />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/raw-materials" element={<RawMaterials />} />
-          <Route path="/production" element={<ProductionCalculation />} />
-        </Routes>
-      </Container>
-    </Layout>
+    <>
+      <Layout>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/products" replace />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/raw-materials" element={<RawMaterials />} />
+            <Route path="/production" element={<ProductionCalculation />} />
+          </Routes>
+        </Container>
+      </Layout>
+      <SnackbarNotification />
+    </>
   );
 }
 

@@ -2,7 +2,9 @@
 
 API REST desenvolvida com Quarkus para gerenciamento de produtos, matérias-primas e cálculo de produção.
 
-## 🚀 Tecnologias
+Por padrão o projeto usa H2 em memória, então você pode rodar com `./mvnw quarkus:dev` sem instalar banco de dados. Se quiser usar PostgreSQL, siga a seção de Configuração abaixo.
+
+## Tecnologias
 
 - **Quarkus 3.6.4** - Framework Java supersônico
 - **Hibernate ORM with Panache** - ORM simplificado
@@ -12,13 +14,14 @@ API REST desenvolvida com Quarkus para gerenciamento de produtos, matérias-prim
 - **JUnit 5** - Testes unitários
 - **REST Assured** - Testes de integração
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
 - Java 17 ou superior
 - Maven 3.8+
-- PostgreSQL 14+
 
-## 🔧 Configuração
+Para uso com H2 (padrão), nada mais é necessário. Para PostgreSQL, você precisa da versão 14 ou superior.
+
+## Configuração
 
 ### 1. Criar Banco de Dados
 
@@ -44,7 +47,7 @@ quarkus.datasource.password=postgres
 quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/autoflex
 ```
 
-## ▶️ Executar
+## Executar
 
 ### Modo Desenvolvimento (com hot reload)
 
@@ -64,7 +67,7 @@ A API estará disponível em `http://localhost:8080`
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-## 🧪 Testes
+## Testes
 
 ```bash
 # Executar todos os testes
@@ -74,7 +77,7 @@ java -jar target/quarkus-app/quarkus-run.jar
 ./mvnw test jacoco:report
 ```
 
-## 📚 Documentação da API
+## Documentação da API
 
 ### Swagger UI
 
@@ -84,7 +87,7 @@ Acesse: `http://localhost:8080/swagger-ui`
 
 Acesse: `http://localhost:8080/swagger`
 
-## 🔗 Endpoints Principais
+## Endpoints Principais
 
 ### Produtos
 - `GET /api/products` - Listar todos
@@ -110,7 +113,7 @@ Acesse: `http://localhost:8080/swagger`
 ### Cálculo de Produção
 - `GET /api/production/calculate` - Calcular produção possível
 
-## 🏗️ Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 src/main/java/com/autoflex/
@@ -138,7 +141,7 @@ src/main/java/com/autoflex/
     └── GlobalExceptionHandler.java
 ```
 
-## 🧮 Algoritmo de Cálculo de Produção
+## Algoritmo de Cálculo de Produção
 
 O `ProductionService` implementa um algoritmo guloso (greedy) que:
 
@@ -151,7 +154,7 @@ O `ProductionService` implementa um algoritmo guloso (greedy) que:
 
 **Complexidade:** O(n × m) onde n = produtos, m = matérias-primas
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Erro de conexão com banco de dados
 
@@ -171,6 +174,6 @@ quarkus.http.port=8081
 
 Os testes usam H2 in-memory. Não é necessário PostgreSQL para testes.
 
-## 📄 Licença
+## Licença
 
 Autoflex © 2024

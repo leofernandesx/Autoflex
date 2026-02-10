@@ -11,17 +11,25 @@ export const fetchRawMaterials = createAsyncThunk(
 
 export const createRawMaterial = createAsyncThunk(
   'rawMaterials/create',
-  async (rawMaterial) => {
-    const response = await rawMaterialsApi.create(rawMaterial);
-    return response.data;
+  async (rawMaterial, { rejectWithValue }) => {
+    try {
+      const response = await rawMaterialsApi.create(rawMaterial);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.userMessage || err.message || 'Error creating raw material');
+    }
   }
 );
 
 export const updateRawMaterial = createAsyncThunk(
   'rawMaterials/update',
-  async ({ id, data }) => {
-    const response = await rawMaterialsApi.update(id, data);
-    return response.data;
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const response = await rawMaterialsApi.update(id, data);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.userMessage || err.message || 'Error updating raw material');
+    }
   }
 );
 
@@ -54,7 +62,7 @@ const rawMaterialsSlice = createSlice({
       })
       .addCase(fetchRawMaterials.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error?.userMessage || action.error?.message;
       })
       // Create raw material
       .addCase(createRawMaterial.fulfilled, (state, action) => {

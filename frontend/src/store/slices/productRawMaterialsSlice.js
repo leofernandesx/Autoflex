@@ -62,7 +62,7 @@ const productRawMaterialsSlice = createSlice({
       })
       .addCase(fetchProductRawMaterials.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error?.userMessage || action.error?.message;
       })
       // Fetch by product ID
       .addCase(fetchProductRawMaterialsByProductId.fulfilled, (state, action) => {

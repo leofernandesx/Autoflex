@@ -2,6 +2,7 @@ package com.autoflex.service;
 
 import com.autoflex.dto.RawMaterialDTO;
 import com.autoflex.entity.RawMaterial;
+import com.autoflex.exception.ConflictException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
@@ -40,10 +41,13 @@ public class RawMaterialService {
         // Check if code already exists
         RawMaterial existing = RawMaterial.findByCode(dto.code);
         if (existing != null) {
-            throw new IllegalArgumentException("Raw material with code " + dto.code + " already exists");
+            throw new ConflictException("Raw material with code " + dto.code + " already exists");
         }
 
-        RawMaterial rawMaterial = dto.toEntity();
+        RawMaterial rawMaterial = new RawMaterial();
+        rawMaterial.code = dto.code;
+        rawMaterial.name = dto.name;
+        rawMaterial.stockQuantity = dto.stockQuantity;
         rawMaterial.persist();
         return RawMaterialDTO.fromEntity(rawMaterial);
     }
@@ -59,7 +63,7 @@ public class RawMaterialService {
         if (!rawMaterial.code.equals(dto.code)) {
             RawMaterial existing = RawMaterial.findByCode(dto.code);
             if (existing != null && !existing.id.equals(id)) {
-                throw new IllegalArgumentException("Raw material with code " + dto.code + " already exists");
+                throw new ConflictException("Raw material with code " + dto.code + " already exists");
             }
         }
 

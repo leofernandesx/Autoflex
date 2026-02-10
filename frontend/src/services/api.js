@@ -1,6 +1,16 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+// Produção (build): URL relativa - nginx faz proxy de /api para o backend (mesma origem)
+// Desenvolvimento (npm start): hostname:8080
+const getApiBaseUrl = () => {
+  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+  if (process.env.NODE_ENV === 'production') return '';
+  if (typeof window !== 'undefined') {
+    return `http://${window.location.hostname}:8080`;
+  }
+  return 'http://localhost:8080';
+};
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,6 +18,27 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Response interceptor: extract backend error message for better UX
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const backendMessage =
+      error.response?.data?.details ||
+      error.response?.data?.message ||
+      (typeof error.response?.data === 'string' ? error.response.data : null);
+    const fallbackMessage =
+      error.response?.status === 404
+        ? 'Resource not found'
+        : error.response?.status === 409
+        ? 'A resource with this code already exists.'
+        : error.response?.status >= 500
+        ? 'Server error. Please try again later.'
+        : error.message || 'An error occurred';
+    error.userMessage = backendMessage || fallbackMessage;
+    return Promise.reject(error);
+  }
+);
 
 // Products API
 export const productsApi = {

@@ -37,6 +37,8 @@ import {
   deleteProductRawMaterial,
 } from '../store/slices/productRawMaterialsSlice';
 import { fetchRawMaterials } from '../store/slices/rawMaterialsSlice';
+import { showSnackbar } from '../store/slices/snackbarSlice';
+import ConfirmDialog from './ConfirmDialog';
 
 function ProductRawMaterialsDialog({ open, onClose, product }) {
   const dispatch = useDispatch();
@@ -49,6 +51,7 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editQuantity, setEditQuantity] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: null });
 
   useEffect(() => {
     if (open && product) {
@@ -89,19 +92,31 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
       ).unwrap();
       setNewAssociation({ rawMaterialId: '', requiredQuantity: '' });
       setError('');
+      dispatch(showSnackbar({ message: 'Raw material added to product', severity: 'success' }));
     } catch (err) {
-      setError(err.message || 'Error adding association');
+      setError(err.userMessage || err.message || 'Error adding association');
     }
   };
 
-  const handleDeleteAssociation = async (id) => {
-    if (window.confirm('Are you sure you want to remove this raw material?')) {
-      try {
-        await dispatch(deleteProductRawMaterial(id)).unwrap();
-      } catch (err) {
-        setError(err.message || 'Error removing association');
-      }
+  const handleDeleteClick = (id) => {
+    setDeleteConfirm({ open: true, id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm.id) return;
+    try {
+      await dispatch(deleteProductRawMaterial(deleteConfirm.id)).unwrap();
+      setError('');
+      dispatch(showSnackbar({ message: 'Raw material removed from product', severity: 'success' }));
+      setDeleteConfirm({ open: false, id: null });
+    } catch (err) {
+      setError(err.userMessage || err.message || 'Error removing association');
+      setDeleteConfirm({ open: false, id: null });
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ open: false, id: null });
   };
 
   const handleStartEdit = (assoc) => {
@@ -135,8 +150,9 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
       ).unwrap();
       handleCancelEdit();
       setError('');
+      dispatch(showSnackbar({ message: 'Association updated successfully', severity: 'success' }));
     } catch (err) {
-      setError(err.message || 'Error updating association');
+      setError(err.userMessage || err.message || 'Error updating association');
     }
   };
 
@@ -226,7 +242,7 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
                             <IconButton
                               size="small"
                               color="error"
-                              onClick={() => handleDeleteAssociation(assoc.id)}
+                              onClick={() => handleDeleteClick(assoc.id)}
                               title="Remove"
                             >
                               <DeleteIcon />
@@ -257,6 +273,7 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
               <FormControl fullWidth>
                 <InputLabel>Raw Material</InputLabel>
                 <Select
+                  data-testid="raw-material-select"
                   value={newAssociation.rawMaterialId}
                   onChange={(e) =>
                     setNewAssociation({
@@ -301,6 +318,16 @@ function ProductRawMaterialsDialog({ open, onClose, product }) {
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        title="Remove Raw Material"
+        message="Are you sure you want to remove this raw material from the product?"
+        confirmText="Remove"
+        cancelText="Cancel"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </Dialog>
   );
 }

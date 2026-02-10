@@ -55,7 +55,10 @@ public class ProductRawMaterialService {
             throw new NotFoundException("Raw material not found with id: " + dto.rawMaterialId);
         }
 
-        ProductRawMaterial prm = dto.toEntity(product, rawMaterial);
+        ProductRawMaterial prm = new ProductRawMaterial();
+        prm.product = product;
+        prm.rawMaterial = rawMaterial;
+        prm.requiredQuantity = dto.requiredQuantity;
         prm.persist();
         return ProductRawMaterialDTO.fromEntity(prm);
     }
